@@ -9,6 +9,7 @@ from checks import check_admin
 from database.dao import add_task, edit_task, get_tasks, get_task_by_id, delete_task
 from database.models import Task
 from msg_locale import TaskMessages, CommonMessages, ButtonMessages, QuestMessages, EditTaskButtonMessages
+from buttons import is_not_button_text
 
 
 class TaskCreateState(StatesGroup):
@@ -260,6 +261,15 @@ def register_task_edit_commands(bot: TeleBot):
 
         bot.edit_message_text(CommonMessages.CANCEL_ACTION, chat_id, message_id)
 
+    # Объект для игнорирования текста с Reply кнопок
+    IGNORED_BUTTON_TEXTS = {
+        EditTaskButtonMessages.NAME,
+        EditTaskButtonMessages.DESCRIPTION, 
+        EditTaskButtonMessages.MEDIA,
+        EditTaskButtonMessages.LOCATION,
+        EditTaskButtonMessages.CODE_WORD,
+    }
+
     # ======== Обработчики для каждой кнопки ========
 
     # Установка состояния для редактирования НАЗВАНИЯ задания
@@ -276,7 +286,11 @@ def register_task_edit_commands(bot: TeleBot):
         bot.send_message(chat_id, EditTaskButtonMessages.EDIT_NAME)
 
     # Cохранение значения в БД
-    @bot.message_handler(state=TaskEditState.waiting_for_name, content_types=['text', 'animation', 'sticker', 'photo', 'video'])
+    @bot.message_handler(
+            state=TaskEditState.waiting_for_name, 
+            content_types=['text', 'animation', 'sticker', 'photo', 'video'], 
+            func=lambda m: is_not_button_text(m, IGNORED_BUTTON_TEXTS)
+    )
     def process_edit_name(message: Message, state: StateContext):
         chat_id = message.chat.id
         task_id = temp_data[chat_id].get("task_id")
@@ -317,7 +331,11 @@ def register_task_edit_commands(bot: TeleBot):
     
 
     # Сохранение описания в БД
-    @bot.message_handler(state=TaskEditState.waiting_for_description, content_types=['text', 'animation', 'sticker', 'photo', 'video'])
+    @bot.message_handler(
+            state=TaskEditState.waiting_for_description, 
+            content_types=['text', 'animation', 'sticker', 'photo', 'video'], 
+            func=lambda m: is_not_button_text(m, IGNORED_BUTTON_TEXTS)
+    )
     def process_edit_description(message: Message, state: StateContext):
         chat_id = message.chat.id
         task_id = temp_data[chat_id].get("task_id")
@@ -357,7 +375,8 @@ def register_task_edit_commands(bot: TeleBot):
     # Сохранение в бд и обработка медиа (фото, стикер, гифка)
     @bot.message_handler(
         state=TaskEditState.waiting_for_media,
-        content_types=['photo', 'sticker', 'animation']
+        content_types=['photo', 'sticker', 'animation'],
+        func=lambda m: is_not_button_text(m, IGNORED_BUTTON_TEXTS)
     )
     def process_edit_media(message: Message, state: StateContext):
         chat_id = message.chat.id
@@ -405,7 +424,11 @@ def register_task_edit_commands(bot: TeleBot):
         bot.send_message(chat_id, EditTaskButtonMessages.EDIT_LOCATION)
 
     # Сохранение локации в БД
-    @bot.message_handler(state=TaskEditState.waiting_for_location, content_types=['text', 'animation', 'sticker', 'photo', 'video'])
+    @bot.message_handler(
+            state=TaskEditState.waiting_for_location, 
+            content_types=['text', 'animation', 'sticker', 'photo', 'video'], 
+            func=lambda m: is_not_button_text(m, IGNORED_BUTTON_TEXTS)
+    )
     def process_edit_location(message: Message, state: StateContext):
         chat_id = message.chat.id
         task_id = temp_data[chat_id].get("task_id")
@@ -441,7 +464,11 @@ def register_task_edit_commands(bot: TeleBot):
         bot.send_message(chat_id, EditTaskButtonMessages.EDIT_CODE_WORD)
 
     # Сохранение кодового слова в БД
-    @bot.message_handler(state=TaskEditState.waiting_for_code, content_types=['text', 'animation', 'sticker', 'photo', 'video'])
+    @bot.message_handler(
+            state=TaskEditState.waiting_for_code, 
+            content_types=['text', 'animation', 'sticker', 'photo', 'video'], 
+            func=lambda m: is_not_button_text(m, IGNORED_BUTTON_TEXTS)
+    )
     def process_edit_code_word(message: Message, state: StateContext):
         chat_id = message.chat.id
         task_id = temp_data[chat_id].get("task_id")

@@ -8,6 +8,7 @@ from telebot.states.sync import StateContext
 from telebot.types import Message, CallbackQuery
 
 from buttons import render_team_buttons, render_cancel_button, render_main_menu, render_team_edit_buttons, render_yes_no_buttons
+from buttons import is_not_button_text
 from checks import check_admin
 from database.dao import add_team, get_teams, update_team, get_team_by_id, get_team_by_name, edit_team, get_all_teams, delete_team
 from database.models import Team
@@ -237,6 +238,14 @@ def register_team_setting_commands(bot: TeleBot):
 def register_team_edit_commands(bot: TeleBot):
     temp_data = defaultdict(dict)
 
+    # Объект для игнорирования текста с Reply кнопок
+    IGNORED_BUTTON_TEXTS = {
+        EditTeamButtonMessages.NAME,
+        EditTeamButtonMessages.DESCRIPTION,
+        EditTeamButtonMessages.WELCOOME,
+        EditTeamButtonMessages.FINAL,
+        EditTeamButtonMessages.CODE_WORD
+    }
 
     # Сообщение со всем списком команд для изменения
     @bot.message_handler(func=lambda m: m.text == ButtonMessages.EDIT_TEAM)
@@ -303,7 +312,11 @@ def register_team_edit_commands(bot: TeleBot):
         bot.send_message(chat_id, EditTeamButtonMessages.EDIT_NAME)
 
     # Cохранение значения в БД
-    @bot.message_handler(state=TeamEditState.waiting_for_name, content_types=['text', 'animation', 'sticker', 'photo', 'video'])
+    @bot.message_handler(
+            state=TeamEditState.waiting_for_name, 
+            content_types=['text', 'animation', 'sticker', 'photo', 'video'],
+            func=lambda m: is_not_button_text(m, IGNORED_BUTTON_TEXTS)
+    )
     def process_edit_name(message: Message, state: StateContext):
         chat_id = message.chat.id
         team_id = temp_data[chat_id].get("team_id")
@@ -355,7 +368,11 @@ def register_team_edit_commands(bot: TeleBot):
         bot.send_message(chat_id, EditTeamButtonMessages.EDIT_DESCRIPTION)
 
     # Cохранение значения в БД
-    @bot.message_handler(state=TeamEditState.waiting_for_description, content_types=['text', 'animation', 'sticker', 'photo', 'video'])
+    @bot.message_handler(
+            state=TeamEditState.waiting_for_description, 
+            content_types=['text', 'animation', 'sticker', 'photo', 'video'],
+            func=lambda m: is_not_button_text(m, IGNORED_BUTTON_TEXTS)
+    )
     def process_edit_description(message: Message, state: StateContext):
         chat_id = message.chat.id
         team_id = temp_data[chat_id].get("team_id")
@@ -396,7 +413,11 @@ def register_team_edit_commands(bot: TeleBot):
         bot.send_message(chat_id, EditTeamButtonMessages.EDIT_WELCOME)
 
     # Cохранение значения в БД
-    @bot.message_handler(state=TeamEditState.waiting_for_welcome, content_types=['text', 'animation', 'sticker', 'photo', 'video'])
+    @bot.message_handler(
+            state=TeamEditState.waiting_for_welcome,
+            content_types=['text', 'animation', 'sticker', 'photo', 'video'],
+            func=lambda m: is_not_button_text(m, IGNORED_BUTTON_TEXTS)
+    )
     def process_edit_welcome(message: Message, state: StateContext):
         chat_id = message.chat.id
         team_id = temp_data[chat_id].get("team_id")
@@ -436,7 +457,11 @@ def register_team_edit_commands(bot: TeleBot):
         bot.send_message(chat_id, EditTeamButtonMessages.EDIT_FINAL)
 
     # Cохранение значения в БД
-    @bot.message_handler(state=TeamEditState.waiting_for_final, content_types=['text', 'animation', 'sticker', 'photo', 'video'])
+    @bot.message_handler(
+            state=TeamEditState.waiting_for_final, 
+            content_types=['text', 'animation', 'sticker', 'photo', 'video'],
+            func=lambda m: is_not_button_text(m, IGNORED_BUTTON_TEXTS)
+    )
     def process_edit_final(message: Message, state: StateContext):
         chat_id = message.chat.id
         team_id = temp_data[chat_id].get("team_id")
@@ -476,7 +501,11 @@ def register_team_edit_commands(bot: TeleBot):
         bot.send_message(chat_id, EditTeamButtonMessages.EDIT_CODEWORD)
     
     # Cохранение значения в БД
-    @bot.message_handler(state=TeamEditState.waiting_for_code_word, content_types=['text', 'animation', 'sticker', 'photo', 'video'])
+    @bot.message_handler(
+            state=TeamEditState.waiting_for_code_word, 
+            content_types=['text', 'animation', 'sticker', 'photo', 'video'],
+            func=lambda m: is_not_button_text(m, IGNORED_BUTTON_TEXTS)
+    )
     def process_edit_code_word(message: Message, state: StateContext):
         chat_id = message.chat.id
         team_id = temp_data[chat_id].get("team_id")

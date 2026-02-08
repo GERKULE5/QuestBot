@@ -1,6 +1,6 @@
 from typing import Type
 
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup
+from telebot.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup
 
 from database.models import Task, Team
 from msg_locale import CommonMessages, ButtonMessages, EditTeamButtonMessages, EditTaskButtonMessages
@@ -177,3 +177,9 @@ def render_yes_no_buttons(
         InlineKeyboardButton(CommonMessages.NO, callback_data=callback_no)
     )
     return markup
+
+
+def is_not_button_text(message: Message, ignored_button_texts: dict) -> bool:
+        if message.content_type != 'text':
+            return True
+        return message.text not in ignored_button_texts
